@@ -24,11 +24,11 @@ namespace CoreCodeCamp.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> GetCamps()
+        public async Task<IActionResult> GetCamps(bool includeTalks = false)
         {
             try
             {
-                var results = await _campRepository.GetAllCampsAsync();
+                var results = await _campRepository.GetAllCampsAsync(includeTalks);
 
                 return Ok(_mapper.Map<CampModel[]>(results));
             }
@@ -55,7 +55,6 @@ namespace CoreCodeCamp.Controllers
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
             }
-
         }
     }
 }
