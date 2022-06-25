@@ -69,7 +69,7 @@ namespace CoreCodeCamp.Controllers
             {
                 var results = await _campRepository.GetAllCampsByEventDate(eventDate, includeTalks);
 
-                if (!results.Any()) { return NotFound(); }
+                if (!results.Any()) { return NotFound($"No record found on event date {eventDate}"); }
 
                 return Ok(_mapper.Map<CampModel[]>(results));
 
@@ -98,7 +98,7 @@ namespace CoreCodeCamp.Controllers
                 
                 var saved = await _campRepository.SaveChangesAsync();
 
-                if (!saved) return BadRequest();
+                if (!saved) return BadRequest("Failed to Create Camp.");
 
                 return Created(location, _mapper.Map<CampModel>(camp));
             }
@@ -121,9 +121,30 @@ namespace CoreCodeCamp.Controllers
 
                 var saved = await _campRepository.SaveChangesAsync();
 
-                if (!saved) return BadRequest();
+                if (!saved) return BadRequest("Failed to Update Camp.");
 
                 return Ok(_mapper.Map<CampModel>(oldCamp));
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
+            }
+        }
+
+        [HttpDelete("{moniker}")]
+        public async Task<IActionResult> Delete(string moniker)
+        {
+            try
+            {
+                var oldCamp = await _campRepository.GetCampAsync(moniker);
+                if (oldCamp == null) { return NotFound($"Could not find camp with Moniker {moniker}."); }
+
+                _campRepository.Delete(oldCamp);
+                var saved = await _campRepository.SaveChangesAsync();
+
+                if (!saved) return BadRequest("Failed to delete Camp.");
+
+                return Ok();
             }
             catch (Exception)
             {
