@@ -39,7 +39,7 @@ namespace CoreCodeCamp.Controllers
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
             }
 
         }
@@ -58,7 +58,7 @@ namespace CoreCodeCamp.Controllers
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
             }
         }
 
@@ -76,7 +76,7 @@ namespace CoreCodeCamp.Controllers
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
             }
         }
 
@@ -104,7 +104,30 @@ namespace CoreCodeCamp.Controllers
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
+            }
+        }
+
+
+        [HttpPut]
+        public async Task<IActionResult> Put(string moniker, CampModel model)
+        {
+            try
+            {
+                var oldCamp = await _campRepository.GetCampAsync(model.Moniker);
+                if (oldCamp == null) { return NotFound($"Could not find camp with Moniker {moniker}."); }
+
+                _mapper.Map(model, oldCamp);
+
+                var saved = await _campRepository.SaveChangesAsync();
+
+                if (!saved) return BadRequest();
+
+                return Ok(_mapper.Map<CampModel>(oldCamp));
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
             }
         }
     }
