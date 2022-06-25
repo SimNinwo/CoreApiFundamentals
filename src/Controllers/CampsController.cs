@@ -86,10 +86,11 @@ namespace CoreCodeCamp.Controllers
         {
             try
             {
+                var itExists = await _campRepository.GetCampAsync(model.Moniker);
+                if (itExists != null) { return BadRequest("Moniker already in use."); }
+
                 var location = _linkGenerator.GetPathByAction("GetCamp", "Camps", new { moniker = model.Moniker });
-
                 if (string.IsNullOrWhiteSpace(location)) { return BadRequest("Could not use current moniker."); }
-
                 
                 var camp = _mapper.Map<Camp>(model);
 
@@ -97,10 +98,9 @@ namespace CoreCodeCamp.Controllers
                 
                 var saved = await _campRepository.SaveChangesAsync();
 
-
                 if (!saved) return BadRequest();
 
-                return Created(location,_mapper.Map<CampModel>(camp));
+                return Created(location, _mapper.Map<CampModel>(camp));
             }
             catch (Exception)
             {
