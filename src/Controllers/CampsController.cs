@@ -109,7 +109,7 @@ namespace CoreCodeCamp.Controllers
         }
 
 
-        [HttpPut]
+        [HttpPut("{moniker}")]
         public async Task<IActionResult> Put(string moniker, CampModel model)
         {
             try
