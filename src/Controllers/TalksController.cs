@@ -77,11 +77,39 @@ namespace CoreCodeCamp.Controllers
                 _campRepository.Add(talk);
                 var saved = await _campRepository.SaveChangesAsync();
 
-                if (!saved) return BadRequest("Failed to Create Camp.");
+                if (!saved) return BadRequest("Failed to Create Talk.");
 
                 var location = _linkGenerator.GetPathByAction("GetTalk", "Talks", new { moniker, talkId = talk.TalkId });
 
                 return Created(location, _mapper.Map<TalkModel>(talk));
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
+            }
+        }
+
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Post(string moniker,int id, TalkModel model)
+        {
+            try
+            {
+                var talk = await _campRepository.GetTalkByMonikerAsync(moniker, id, true);
+                if (talk == null) return NotFound("Could not find the talk.");
+             
+                 _mapper.Map(model, talk);
+
+                if(model.Speaker != null)
+                {
+                    var speaker = await _campRepository.GetSpeakerAsync(model.Speaker.SpeakerId);
+                    if (speaker != null) { talk.Speaker = speaker; }
+                }
+                
+                var saved = await _campRepository.SaveChangesAsync();
+
+                if (!saved) return BadRequest("Failed to Update Talk.");
+
+                return Ok(_mapper.Map<TalkModel>(talk));
             }
             catch (Exception)
             {
